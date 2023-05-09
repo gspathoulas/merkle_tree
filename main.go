@@ -90,7 +90,6 @@ func (mt *Merkle_tree) build_tree() {
 			n.left_child = i
 			n.right_child = i + 1
 			nodes = append(nodes, n)
-			//mt.lookup[ind_range{start: n.start_index,end : n.end_index}] = nodes_pop-1
 		}
 
 		// if the last level has only one element stop... root of the Merkle tree has been found
