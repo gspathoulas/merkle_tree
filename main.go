@@ -175,17 +175,53 @@ func (mt Merkle_tree) validate_proof(index int, proof [][]byte) bool {
 }
 
 //function to add an element
-
 func (mt *Merkle_tree) add_element(s string) {
 
-	//to be added
+	if len(mt.elements) % 2 == 1{ //if elements were odd then we just replace the additional node in the lower layer
+		mt.elements = append(mt.elements,s)
+		mt.tree[len(mt.elements)].value = hash_string(s)
+		mt.tree[len(mt.elements)].left_child = 0
+		mt.tree[len(mt.elements)].right_child = 0
+		mt.update_element(len(mt.elements),s) //and we just update the tree
+	} else {// if elements were even then we need to expand the lower layer, so the tree is rebuit from scratch
+		mt.elements = append(mt.elements,s)
+		mt.build_tree()
+	}
 
 }
 
+//function to update an element
 func (mt *Merkle_tree) update_element(ind int, s string) {
+	if ind >= 0 && ind <= len(mt.elements){ // if the index is valid
+		mt.elements[ind] = s 
+		mt.tree[ind].value = hash_string(s) //update lower level of the tree
+		var place_to_start int
+		if len(mt.elements)%2 == 0{ //find the first node of the second to bottom layer
+			place_to_start = len(mt.elements)
+		} else {
+			place_to_start = len(mt.elements) + 1
+		}
+		for i:= place_to_start;i<len(mt.tree);i++{ //for all nodes (besides the base layer)
+			if mt.tree[i].start_index <= ind && mt.tree[i].end_index >= ind { //if the index to be changed is included in the node's sub-tree update it according to its descendants
+				l := mt.tree[mt.tree[i].left_child].value
+				r := mt.tree[mt.tree[i].right_child].value
+				mt.tree[i].value = hash_node(append(l,r...))
+			}
+			if mt.tree[i].left_child == -1{ //if the node is a copied one at the end of a layer update to be sure
+				mt.tree[i].value = mt.tree[i-1].value
+			}
+		}
+		mt.root = mt.tree[len(mt.tree)-1]
+	} else{
+		fmt.Println("invalid index to update")
+	}
+}
 
-	//to be added
-
+func (mt *Merkle_tree) delete_element(ind int) {
+	if ind >= 0 && ind <= len(mt.elements){
+		mt.elements = append(mt.elements[:ind],mt.elements[ind+1:]...)
+		mt.build_tree()
+	}
 }
 
 // function to hash a string
@@ -208,7 +244,7 @@ func hash_node(b []byte) []byte {
 // Create a Merkle Tree
 // Initialise it with the strings in the list
 // Build the Merkle Tree
-// Generatea proof for a specific element (through the use of its index)
+// Generate a proof for a specific element (through the use of its index)
 // Validate the generated proof
 
 func main() {
@@ -219,7 +255,29 @@ func main() {
 	mt.print_elements()
 	mt.build_tree()
 	mt.print_nodes()
+	
 	proof := mt.get_proof(2)
 	fmt.Println(mt.validate_proof(2, proof))
+
+	mt.update_element(3,"Hope")
+	mt.print_elements()
+	mt.print_nodes()
+
+	proof = mt.get_proof(2)
+	fmt.Println(mt.validate_proof(2, proof))
+
+	mt.add_element("Steve")
+	mt.print_elements()
+	mt.print_nodes()
+	
+	proof = mt.get_proof(6)
+	fmt.Println(mt.validate_proof(6, proof))
+
+	mt.delete_element(1)
+	mt.print_elements()
+	mt.print_nodes()
+	
+	proof = mt.get_proof(3)
+	fmt.Println(mt.validate_proof(3, proof))
 
 }
