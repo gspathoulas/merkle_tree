@@ -217,10 +217,11 @@ func (mt *Merkle_tree) update_element(ind int, s string) {
 	}
 }
 
+//function to delete an element
 func (mt *Merkle_tree) delete_element(ind int) {
 	if ind >= 0 && ind <= len(mt.elements){
-		mt.elements = append(mt.elements[:ind],mt.elements[ind+1:]...)
-		mt.build_tree()
+		mt.elements = append(mt.elements[:ind],mt.elements[ind+1:]...) //remove the element
+		mt.build_tree() //rebuild the tree
 	}
 }
 
