@@ -7,8 +7,6 @@ Functionality of the Merkle tree
 - Build tree
 - Generate proof
 - Validate proof
-
-Functionality to be added
-
 - Update element
 - Add element
+- Delete element
